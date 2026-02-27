@@ -1,0 +1,11 @@
+New Job Request
+
+Hello <%= @worker.first_name %>,
+
+You received a new job request from <%= @customer.first_name %> <%= @customer.last_name %>.
+Description: <%= @job.description %>
+Schedule: <%= @job.scheduled_at.in_time_zone("Asia/Kolkata").strftime("%d %b %Y, %I:%M %p IST") %>
+Location: <%= @job.location %>
+
+Review and accept/reject from your dashboard:
+<%= @dashboard_url %>

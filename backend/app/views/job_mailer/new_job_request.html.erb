@@ -1,0 +1,12 @@
+<h2>New Job Request</h2>
+
+<p>Hello <%= @worker.first_name %>,</p>
+
+<p>You received a new job request from <strong><%= @customer.first_name %> <%= @customer.last_name %></strong>.</p>
+
+<p><strong>Description:</strong> <%= @job.description %></p>
+<p><strong>Schedule:</strong> <%= @job.scheduled_at.in_time_zone("Asia/Kolkata").strftime("%d %b %Y, %I:%M %p IST") %></p>
+<p><strong>Location:</strong> <%= @job.location %></p>
+
+<p>Please review and accept/reject the request from your dashboard:</p>
+<p><a href="<%= @dashboard_url %>">Open Worker Dashboard</a></p>
