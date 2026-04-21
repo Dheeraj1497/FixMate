@@ -62,12 +62,6 @@ export default function WorkerDashboard() {
           <p className="text-xs uppercase tracking-[0.3em] text-neutral-400">Worker hub</p>
           <h1 className="text-3xl md:text-4xl font-display font-semibold text-white">Job Requests</h1>
         </div>
-        <Link
-          href="/worker/profile"
-          className="rounded-full border border-emerald-400/40 bg-emerald-400/15 px-5 py-2.5 text-sm font-semibold text-emerald-200 transition hover:bg-emerald-400/25"
-        >
-          Edit Profile
-        </Link>
       </div>
 
       {notifications.length > 0 && (
@@ -114,15 +108,14 @@ export default function WorkerDashboard() {
                 </p>
                 <p className="text-sm mt-3">
                   <span className="font-medium text-neutral-200">Status:</span>{' '}
-                  <span className={`capitalize px-3 py-1 rounded-full text-xs font-semibold border ${
-                    job.status === 'pending'
+                  <span className={`capitalize px-3 py-1 rounded-full text-xs font-semibold border ${job.status === 'pending'
                       ? 'bg-yellow-400/10 text-yellow-200 border-yellow-400/30'
                       : job.status === 'accepted'
                         ? 'bg-cyan-400/10 text-cyan-200 border-cyan-400/30'
                         : job.status === 'completed'
                           ? 'bg-emerald-400/10 text-emerald-200 border-emerald-400/30'
                           : 'bg-rose-400/10 text-rose-200 border-rose-400/30'
-                  }`}>{job.status}</span>
+                    }`}>{job.status}</span>
                 </p>
               </div>
               <div className="flex flex-col md:flex-row gap-2">

@@ -5,6 +5,7 @@ class Api::V1::Users::RegistrationsController < Devise::RegistrationsController
 
   def respond_with(resource, _opts = {})
     if resource.persisted?
+      UserMailer.welcome_email(resource).deliver_now
       render json: {
         message: 'Signed up successfully.',
         user: resource

@@ -7,10 +7,12 @@ import LoadingState from '@/components/LoadingState';
 
 export default function CustomerDashboard() {
   const [jobs, setJobs] = useState([]);
+  const [notifications, setNotifications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchJobs();
+    fetchNotifications();
   }, []);
 
   const fetchJobs = async () => {
@@ -34,6 +36,24 @@ export default function CustomerDashboard() {
     }
   };
 
+  const fetchNotifications = async () => {
+    try {
+      const res = await api.get('/notifications?limit=5');
+      setNotifications(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const markNotificationRead = async (id: number) => {
+    try {
+      await api.patch(`/notifications/${id}/mark_read`);
+      fetchNotifications();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   return (
     <div className="mx-auto max-w-6xl px-6 py-12">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-10">
@@ -48,6 +68,29 @@ export default function CustomerDashboard() {
           Book a Service
         </Link>
       </div>
+
+      {notifications.length > 0 && (
+        <div className="rounded-3xl border border-white/10 bg-white/5 p-6 mb-8">
+          <h2 className="font-semibold text-lg text-white mb-4">Recent Notifications</h2>
+          <div className="space-y-3">
+            {notifications.map((notification: any) => (
+              <div key={notification.id} className="flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-neutral-900/40 p-4">
+                <p className={`text-sm ${notification.read ? 'text-neutral-400' : 'text-neutral-100 font-medium'}`}>
+                  {notification.message}
+                </p>
+                {!notification.read && (
+                  <button
+                    onClick={() => markNotificationRead(notification.id)}
+                    className="text-xs text-emerald-200 border border-emerald-400/40 px-3 py-1.5 rounded-full"
+                  >
+                    Mark read
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {loading ? (
         <LoadingState label="Loading requests" />
@@ -69,15 +112,14 @@ export default function CustomerDashboard() {
                 <p className="text-neutral-400 text-sm">Location: {job.location}</p>
                 <p className="text-sm mt-2">
                   <span className="font-medium text-neutral-200">Status:</span>{' '}
-                  <span className={`capitalize px-3 py-1 rounded-full text-xs font-semibold border ${
-                    job.status === 'pending'
+                  <span className={`capitalize px-3 py-1 rounded-full text-xs font-semibold border ${job.status === 'pending'
                       ? 'bg-yellow-400/10 text-yellow-200 border-yellow-400/30'
                       : job.status === 'accepted'
                         ? 'bg-cyan-400/10 text-cyan-200 border-cyan-400/30'
                         : job.status === 'completed'
                           ? 'bg-emerald-400/10 text-emerald-200 border-emerald-400/30'
                           : 'bg-rose-400/10 text-rose-200 border-rose-400/30'
-                  }`}>{job.status}</span>
+                    }`}>{job.status}</span>
                 </p>
               </div>
               <div className="flex flex-col gap-2">

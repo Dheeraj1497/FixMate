@@ -11,39 +11,56 @@ const categories = [
 ];
 
 export default function HeroSection() {
-  const [location, setLocation] = useState('Select location');
   const [greeting, setGreeting] = useState('FixMate India');
+  const [cities, setCities] = useState<any[]>([]);
+  const [selectedCity, setSelectedCity] = useState('');
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   useEffect(() => {
-    const token = Cookies.get('token');
-    if (!token) return;
+    const fetchInitialData = async () => {
+      let loadedCities: any[] = [];
+      try {
+        const res = await api.get('/cities');
+        loadedCities = res.data;
+        setCities(loadedCities);
+      } catch {
+        // ignore
+      }
 
-    api.get('/users/me')
-      .then(async (res) => {
-        const first = res.data?.first_name || '';
+      const token = Cookies.get('token');
+      if (!token) return;
+
+      try {
+        const userRes = await api.get('/users/me');
+        const first = userRes.data?.first_name || '';
         setGreeting(first ? `Hi, ${first}` : 'FixMate India');
 
-        if (res.data?.role === 'worker') {
-          const city = res.data?.city;
-          if (city) setLocation(city);
+        let userCityName = '';
+        if (userRes.data?.role === 'worker') {
+          userCityName = userRes.data?.city || '';
         } else {
-          try {
-            const jobs = await api.get('/jobs/my');
-            const last = jobs.data?.[0];
-            if (last?.location) setLocation(last.location);
-          } catch {
-            // ignore
-          }
+          const jobs = await api.get('/jobs/my');
+          const last = jobs.data?.[0];
+          if (last?.location) userCityName = last.location;
         }
-      })
-      .catch(() => {
+
+        if (userCityName && loadedCities.length > 0) {
+          const match = loadedCities.find(
+            (c: any) => c.name.toLowerCase() === userCityName.toLowerCase()
+          );
+          if (match) setSelectedCity(match.id.toString());
+        }
+      } catch {
         setGreeting('FixMate India');
-      });
+      }
+    };
+
+    fetchInitialData();
   }, []);
 
   return (
-    <section className="relative overflow-hidden">
-      <div className="absolute inset-0">
+    <section className="relative">
+      <div className="absolute inset-0 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-ink-900/90 to-black/80" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(16,185,129,0.18),transparent_45%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_10%,rgba(56,189,248,0.14),transparent_45%)]" />
@@ -61,15 +78,71 @@ export default function HeroSection() {
         </div>
 
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-          <div className="flex-1 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-neutral-300">
-            <span className="text-neutral-400">📍</span> {location}
+          <div className="flex-1 relative">
+            <button
+              type="button"
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+              className="w-full h-full flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 pl-10 pr-4 py-3 text-sm text-neutral-300 hover:border-emerald-400/40 hover:text-white transition outline-none"
+            >
+              <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                <span className="text-neutral-400">📍</span>
+              </div>
+              <span className="flex-1 text-left truncate">
+                {selectedCity ? cities.find(c => c.id.toString() === selectedCity)?.name || 'Select city' : 'Select city'}
+              </span>
+              <div className="flex items-center pointer-events-none ml-2">
+                <span className={`text-neutral-500 text-[10px] transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`}>▼</span>
+              </div>
+            </button>
+
+            {dropdownOpen && (
+              <>
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setDropdownOpen(false)}
+                />
+                <div className="absolute top-full left-0 right-0 mt-2 rounded-2xl border border-white/10 bg-ink-900/95 backdrop-blur shadow-xl overflow-hidden z-50 transform origin-top animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="max-h-60 overflow-y-auto w-full p-2 flex flex-col gap-1 custom-scrollbar">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedCity('');
+                        setDropdownOpen(false);
+                      }}
+                      className={`w-full text-left px-3 py-2.5 rounded-xl text-sm transition ${selectedCity === ''
+                        ? 'text-emerald-300 bg-emerald-400/10 font-medium'
+                        : 'text-neutral-300 hover:bg-white/5 hover:text-white'
+                        }`}
+                    >
+                      All Cities
+                    </button>
+                    {cities.map((c: any) => (
+                      <button
+                        key={c.id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedCity(c.id.toString());
+                          setDropdownOpen(false);
+                        }}
+                        className={`w-full text-left px-3 py-2.5 rounded-xl text-sm transition ${selectedCity === c.id.toString()
+                          ? 'text-emerald-300 bg-emerald-400/10 font-medium'
+                          : 'text-neutral-300 hover:bg-white/5 hover:text-white'
+                          }`}
+                      >
+                        {c.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
           </div>
-          <div className="flex-[2] rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-neutral-300">
-            Search for services
+          <div className="flex-[2] flex items-center rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-neutral-400">
+            Search for professionals and services...
           </div>
           <Link
-            href="/customer/workers"
-            className="rounded-2xl border border-emerald-400/40 bg-emerald-400/15 px-5 py-3 text-sm font-semibold text-emerald-200 hover:bg-emerald-400/25 transition text-center"
+            href={selectedCity ? `/customer/workers?city_id=${selectedCity}` : '/customer/workers'}
+            className="flex items-center justify-center rounded-2xl border border-emerald-400/40 bg-emerald-400/15 px-8 py-3 text-sm font-semibold text-emerald-200 hover:bg-emerald-400/25 transition text-center"
           >
             Explore
           </Link>

@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import api from '@/lib/api';
 import { useRouter } from 'next/navigation';
+import CustomSelect from '@/components/CustomSelect';
 
 export default function WorkerProfileManage() {
   const [cities, setCities] = useState([]);
@@ -80,18 +81,13 @@ export default function WorkerProfileManage() {
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-              <label className="block text-xs uppercase tracking-widest text-neutral-400 mb-2">City</label>
-              <select
-                required
+              <CustomSelect
+                label="City"
+                placeholder="Select a city"
                 value={formData.city_id}
-                onChange={e => setFormData({ ...formData, city_id: e.target.value })}
-                className="w-full rounded-xl border border-white/10 bg-neutral-900/60 text-neutral-100 shadow-sm focus:border-emerald-400 focus:ring-emerald-400 p-3"
-              >
-                <option value="">Select a city</option>
-                {cities.map((city: any) => (
-                  <option key={city.id} value={city.id}>{city.name}</option>
-                ))}
-              </select>
+                onChange={value => setFormData({ ...formData, city_id: value })}
+                options={cities.map((city: any) => ({ id: city.id, name: city.name }))}
+              />
             </div>
             <div>
               <label className="block text-xs uppercase tracking-widest text-neutral-400 mb-2">Hourly Rate (₹)</label>

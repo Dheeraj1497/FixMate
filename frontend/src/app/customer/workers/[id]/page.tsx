@@ -20,7 +20,7 @@ export default function WorkerProfile({ params }: { params: { id: string } }) {
   useEffect(() => {
     api.get(`/workers/${params.id}`).then(res => setWorker(res.data));
   }, [params.id]);
- 
+
   useEffect(() => {
     setIsAuthed(!!Cookies.get('token'));
   }, []);
@@ -78,9 +78,8 @@ export default function WorkerProfile({ params }: { params: { id: string } }) {
               {worker.user.first_name} {worker.user.last_name}
             </h1>
           </div>
-          <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${
-            worker.availability ? 'bg-emerald-400/10 text-emerald-200 border-emerald-400/30' : 'bg-rose-400/10 text-rose-200 border-rose-400/30'
-          }`}>
+          <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${worker.availability ? 'bg-emerald-400/10 text-emerald-200 border-emerald-400/30' : 'bg-rose-400/10 text-rose-200 border-rose-400/30'
+            }`}>
             {worker.availability ? 'Available' : 'Busy'}
           </span>
         </div>
@@ -114,90 +113,81 @@ export default function WorkerProfile({ params }: { params: { id: string } }) {
         </div>
       </div>
 
-      <div className="rounded-3xl border border-white/10 bg-white/5 p-8">
-        <h2 className="text-2xl font-display font-semibold text-white mb-6">Book this Professional</h2>
-        {message && (
-          <div className="bg-emerald-400/10 text-emerald-200 p-3 rounded-xl mb-4 text-sm border border-emerald-400/30">
-            {message}
-          </div>
-        )}
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label className="block text-xs uppercase tracking-widest text-neutral-400 mb-2">Select Service</label>
-            <select
-              required
-              value={formData.service_id}
-              onChange={e => setFormData({ ...formData, service_id: e.target.value })}
-              className="w-full rounded-xl border border-white/10 bg-neutral-900/60 text-neutral-100 shadow-sm focus:border-emerald-400 focus:ring-emerald-400 p-3"
-            >
-              <option value="">-- Choose a service --</option>
-              {worker.services?.map((s: any) => (
-                <option key={s.id} value={s.id}>{s.name}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-xs uppercase tracking-widest text-neutral-400 mb-2">Problem Description</label>
-            <textarea
-              required
-              rows={3}
-              value={formData.description}
-              onChange={e => setFormData({ ...formData, description: e.target.value })}
-              className="w-full rounded-xl border border-white/10 bg-neutral-900/60 text-neutral-100 shadow-sm focus:border-emerald-400 focus:ring-emerald-400 p-3"
-              placeholder="Describe the issue..."
-            />
-          </div>
-          <div>
-            <label className="block text-xs uppercase tracking-widest text-neutral-400 mb-2">Service Location (Address)</label>
-            <input
-              type="text"
-              required
-              value={formData.location}
-              onChange={e => setFormData({ ...formData, location: e.target.value })}
-              className="w-full rounded-xl border border-white/10 bg-neutral-900/60 text-neutral-100 shadow-sm focus:border-emerald-400 focus:ring-emerald-400 p-3"
-              placeholder="Full address"
-            />
-          </div>
-          <div>
-            <label className="block text-xs uppercase tracking-widest text-neutral-400 mb-2">Preferred Schedule</label>
-            <input
-              type="datetime-local"
-              required
-              value={formData.scheduled_at}
-              onChange={e => setFormData({ ...formData, scheduled_at: e.target.value })}
-              className="w-full rounded-xl border border-white/10 bg-neutral-900/60 text-neutral-100 shadow-sm focus:border-emerald-400 focus:ring-emerald-400 p-3"
-            />
-            <p className="text-xs text-neutral-500 mt-2">Time is interpreted in IST for service scheduling.</p>
-          </div>
-          <div>
-            <label className="block text-xs uppercase tracking-widest text-neutral-400 mb-2">Problem Images (Optional)</label>
-            <input
-              type="file"
-              accept="image/png,image/jpeg,image/jpg,image/webp"
-              multiple
-              onChange={handleImageChange}
-              className="w-full rounded-xl border border-white/10 bg-neutral-900/60 text-neutral-100 shadow-sm focus:border-emerald-400 focus:ring-emerald-400 p-3"
-            />
-            {images.length > 0 && (
-              <div className="mt-3 grid grid-cols-3 gap-3">
-                {images.map((file) => (
-                  <div key={file.name} className="text-xs text-neutral-300 border border-white/10 rounded-xl p-2 bg-neutral-900/40 truncate" title={file.name}>
-                    {file.name}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-          {!isAuthed ? (
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-neutral-300">
-              Please sign in to request a job.
-              <div className="mt-3">
-                <Link href="/login" className="rounded-full border border-emerald-400/40 bg-emerald-400/15 px-4 py-2 text-sm font-semibold text-emerald-200 hover:bg-emerald-400/25 transition">
-                  Login
-                </Link>
-              </div>
+      {isAuthed ? (
+        <div className="rounded-3xl border border-white/10 bg-white/5 p-8">
+          <h2 className="text-2xl font-display font-semibold text-white mb-6">Book this Professional</h2>
+          {message && (
+            <div className="bg-emerald-400/10 text-emerald-200 p-3 rounded-xl mb-4 text-sm border border-emerald-400/30">
+              {message}
             </div>
-          ) : (
+          )}
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <label className="block text-xs uppercase tracking-widest text-neutral-400 mb-2">Select Service</label>
+              <select
+                required
+                value={formData.service_id}
+                onChange={e => setFormData({ ...formData, service_id: e.target.value })}
+                className="w-full rounded-xl border border-white/10 bg-neutral-900/60 text-neutral-100 shadow-sm focus:border-emerald-400 focus:ring-emerald-400 p-3"
+              >
+                <option value="">-- Choose a service --</option>
+                {worker.services?.map((s: any) => (
+                  <option key={s.id} value={s.id}>{s.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs uppercase tracking-widest text-neutral-400 mb-2">Problem Description</label>
+              <textarea
+                required
+                rows={3}
+                value={formData.description}
+                onChange={e => setFormData({ ...formData, description: e.target.value })}
+                className="w-full rounded-xl border border-white/10 bg-neutral-900/60 text-neutral-100 shadow-sm focus:border-emerald-400 focus:ring-emerald-400 p-3"
+                placeholder="Describe the issue..."
+              />
+            </div>
+            <div>
+              <label className="block text-xs uppercase tracking-widest text-neutral-400 mb-2">Service Location (Address)</label>
+              <input
+                type="text"
+                required
+                value={formData.location}
+                onChange={e => setFormData({ ...formData, location: e.target.value })}
+                className="w-full rounded-xl border border-white/10 bg-neutral-900/60 text-neutral-100 shadow-sm focus:border-emerald-400 focus:ring-emerald-400 p-3"
+                placeholder="Full address"
+              />
+            </div>
+            <div>
+              <label className="block text-xs uppercase tracking-widest text-neutral-400 mb-2">Preferred Schedule</label>
+              <input
+                type="datetime-local"
+                required
+                value={formData.scheduled_at}
+                onChange={e => setFormData({ ...formData, scheduled_at: e.target.value })}
+                className="w-full rounded-xl border border-white/10 bg-neutral-900/60 text-neutral-100 shadow-sm focus:border-emerald-400 focus:ring-emerald-400 p-3"
+              />
+              <p className="text-xs text-neutral-500 mt-2">Time is interpreted in IST for service scheduling.</p>
+            </div>
+            <div>
+              <label className="block text-xs uppercase tracking-widest text-neutral-400 mb-2">Problem Images (Optional)</label>
+              <input
+                type="file"
+                accept="image/png,image/jpeg,image/jpg,image/webp"
+                multiple
+                onChange={handleImageChange}
+                className="w-full rounded-xl border border-white/10 bg-neutral-900/60 text-neutral-100 shadow-sm focus:border-emerald-400 focus:ring-emerald-400 p-3"
+              />
+              {images.length > 0 && (
+                <div className="mt-3 grid grid-cols-3 gap-3">
+                  {images.map((file) => (
+                    <div key={file.name} className="text-xs text-neutral-300 border border-white/10 rounded-xl p-2 bg-neutral-900/40 truncate" title={file.name}>
+                      {file.name}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
             <button
               type="submit"
               disabled={loading || !worker.availability}
@@ -205,9 +195,22 @@ export default function WorkerProfile({ params }: { params: { id: string } }) {
             >
               {loading ? 'Submitting...' : worker.availability ? 'Request Job' : 'Worker is currently busy'}
             </button>
-          )}
-        </form>
-      </div>
+          </form>
+        </div>
+      ) : (
+        <div className="rounded-3xl border border-white/10 bg-white/5 p-8 flex flex-col items-center justify-center text-center">
+          <div className="h-16 w-16 mb-4 rounded-full bg-emerald-400/10 border border-emerald-400/20 flex items-center justify-center text-2xl">
+            🔒
+          </div>
+          <h2 className="text-xl font-display font-semibold text-white mb-2">Sign in to book</h2>
+          <p className="text-neutral-400 text-sm max-w-sm mb-6">
+            You need to be logged into a customer account to send job requests and book professionals.
+          </p>
+          <Link href="/login" className="rounded-full border border-emerald-400/40 bg-emerald-400/15 px-6 py-2.5 text-sm font-semibold text-emerald-200 hover:bg-emerald-400/25 transition">
+            Log In or Register
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

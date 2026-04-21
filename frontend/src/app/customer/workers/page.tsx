@@ -1,25 +1,33 @@
 "use client";
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import api from '@/lib/api';
 import WorkerCard from '@/components/WorkerCard';
 import EmptyState from '@/components/EmptyState';
 import LoadingState from '@/components/LoadingState';
 import Cookies from 'js-cookie';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import CustomSelect from '@/components/CustomSelect';
 
-export default function SearchWorkers() {
+function WorkersSearchContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [workers, setWorkers] = useState<any[]>([]);
   const [cities, setCities] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [services, setServices] = useState<any[]>([]);
-  const [selectedCity, setSelectedCity] = useState('');
+  const [selectedCity, setSelectedCity] = useState(searchParams.get('city_id') || '');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedService, setSelectedService] = useState('');
   const [availability, setAvailability] = useState('');
   const [page, setPage] = useState(1);
   const [meta, setMeta] = useState({ page: 1, total_pages: 1, total_count: 0 });
   const [loading, setLoading] = useState(true);
+
+  // Sync state if searchParams changes from navigation
+  useEffect(() => {
+    const cityId = searchParams.get('city_id');
+    if (cityId) setSelectedCity(cityId);
+  }, [searchParams]);
 
   useEffect(() => {
     const role = Cookies.get('userRole');
@@ -31,7 +39,16 @@ export default function SearchWorkers() {
       setCategories(res.data);
       const allServices = res.data.flatMap((cat: any) => cat.services || []);
       setServices(allServices);
+
+      const categoryNameParam = searchParams.get('category_name');
+      if (categoryNameParam) {
+        const foundCategory = res.data.find((c: any) => c.name.toLowerCase() === categoryNameParam.toLowerCase());
+        if (foundCategory) {
+          setSelectedCategory(foundCategory.id.toString());
+        }
+      }
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchWorkers = async () => {
@@ -65,8 +82,9 @@ export default function SearchWorkers() {
 
   return (
     <div className="bg-neutral-950 text-neutral-100">
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0">
+      <section className="relative">
+        {/* Background blobs wrapper with hidden overflow */}
+        <div className="absolute inset-0 overflow-hidden">
           <div className="absolute -top-32 -left-24 h-72 w-72 rounded-full bg-emerald-500/20 blur-3xl" />
           <div className="absolute top-10 right-0 h-80 w-80 rounded-full bg-cyan-400/20 blur-3xl" />
           <div className="absolute bottom-0 left-1/3 h-64 w-64 rounded-full bg-fuchsia-500/10 blur-3xl" />
@@ -102,55 +120,43 @@ export default function SearchWorkers() {
           <div className="mt-8 rounded-3xl border border-white/10 bg-white/5 p-5 md:p-6 backdrop-blur">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
               <div className="flex-1">
-                <label className="block text-xs uppercase tracking-widest text-neutral-300 mb-2">City</label>
-                <select
+                <CustomSelect
+                  label="City"
+                  placeholder="All Cities"
                   value={selectedCity}
-                  onChange={(e) => setSelectedCity(e.target.value)}
-                  className="w-full rounded-xl border border-white/10 bg-neutral-900/60 text-neutral-100 shadow-sm focus:border-emerald-400 focus:ring-emerald-400 p-3"
-                >
-                  <option value="">All Cities</option>
-                  {cities.map((city: any) => (
-                    <option key={city.id} value={city.id}>{city.name}</option>
-                  ))}
-                </select>
+                  onChange={setSelectedCity}
+                  options={cities.map((city: any) => ({ id: city.id, name: city.name }))}
+                />
               </div>
               <div className="flex-1">
-                <label className="block text-xs uppercase tracking-widest text-neutral-300 mb-2">Category</label>
-                <select
+                <CustomSelect
+                  label="Category"
+                  placeholder="All Categories"
                   value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="w-full rounded-xl border border-white/10 bg-neutral-900/60 text-neutral-100 shadow-sm focus:border-emerald-400 focus:ring-emerald-400 p-3"
-                >
-                  <option value="">All Categories</option>
-                  {categories.map((cat: any) => (
-                    <option key={cat.id} value={cat.id}>{cat.name}</option>
-                  ))}
-                </select>
+                  onChange={setSelectedCategory}
+                  options={categories.map((cat: any) => ({ id: cat.id, name: cat.name }))}
+                />
               </div>
               <div className="flex-1">
-                <label className="block text-xs uppercase tracking-widest text-neutral-300 mb-2">Service</label>
-                <select
+                <CustomSelect
+                  label="Service"
+                  placeholder="All Services"
                   value={selectedService}
-                  onChange={(e) => setSelectedService(e.target.value)}
-                  className="w-full rounded-xl border border-white/10 bg-neutral-900/60 text-neutral-100 shadow-sm focus:border-emerald-400 focus:ring-emerald-400 p-3"
-                >
-                  <option value="">All Services</option>
-                  {services.map((service: any) => (
-                    <option key={service.id} value={service.id}>{service.name}</option>
-                  ))}
-                </select>
+                  onChange={setSelectedService}
+                  options={services.map((service: any) => ({ id: service.id, name: service.name }))}
+                />
               </div>
               <div className="flex-1">
-                <label className="block text-xs uppercase tracking-widest text-neutral-300 mb-2">Availability</label>
-                <select
+                <CustomSelect
+                  label="Availability"
+                  placeholder="All"
                   value={availability}
-                  onChange={(e) => setAvailability(e.target.value)}
-                  className="w-full rounded-xl border border-white/10 bg-neutral-900/60 text-neutral-100 shadow-sm focus:border-emerald-400 focus:ring-emerald-400 p-3"
-                >
-                  <option value="">All</option>
-                  <option value="true">Available</option>
-                  <option value="false">Busy</option>
-                </select>
+                  onChange={setAvailability}
+                  options={[
+                    { id: 'true', name: 'Available' },
+                    { id: 'false', name: 'Busy' }
+                  ]}
+                />
               </div>
             </div>
           </div>
@@ -210,5 +216,13 @@ export default function SearchWorkers() {
         </div>
       </section>
     </div>
+  );
+}
+
+export default function SearchWorkers() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-neutral-950 flex justify-center pt-20"><LoadingState label="Loading parameters..." /></div>}>
+      <WorkersSearchContent />
+    </Suspense>
   );
 }

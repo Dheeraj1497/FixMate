@@ -4,6 +4,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import Cookies from 'js-cookie';
 import { useEffect, useRef, useState } from 'react';
 import api from '@/lib/api';
+import { Bell } from 'lucide-react';
 
 export default function Navbar({
   onToggleSidebar,
@@ -37,7 +38,7 @@ export default function Navbar({
         .catch(() => setUserName(''));
     }
 
-    if (authToken && currentRole === 'worker') {
+    if (authToken) {
       api.get('/notifications/unread_count')
         .then((res) => setUnreadCount(res.data.unread_count || 0))
         .catch(() => setUnreadCount(0));
@@ -88,18 +89,29 @@ export default function Navbar({
             <span className="sr-only">Menu</span>
           </button>
           <Link href="/" className="flex items-center gap-2">
-          <span className="text-lg font-semibold tracking-[0.2em] text-emerald-300">FM</span>
-          <span className="text-xl font-semibold text-white">FixMate</span>
-        </Link>
+            <span className="text-lg font-semibold tracking-[0.2em] text-emerald-300">FM</span>
+            <span className="text-xl font-semibold text-white">FixMate</span>
+          </Link>
         </div>
 
         <div className="flex items-center gap-3 text-sm">
           {!mounted ? null : token ? (
             <>
+              <Link
+                href={dashboardLink}
+                className="relative flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-neutral-200 hover:border-emerald-400/40 hover:text-white transition cursor-pointer"
+              >
+                <Bell size={18} />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white shadow-sm ring-2 ring-ink-900">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+              </Link>
               <div className="relative" ref={menuRef}>
                 <button
                   onClick={() => setMenuOpen((prev) => !prev)}
-                  className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-neutral-200 hover:border-emerald-400/40 hover:text-white transition"
+                  className="flex h-10 items-center gap-2 rounded-full border border-white/10 bg-white/5 px-2 pr-4 text-neutral-200 hover:border-emerald-400/40 hover:text-white transition"
                 >
                   <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-emerald-400/20 text-emerald-200 text-xs font-semibold">
                     {initials}
@@ -114,17 +126,15 @@ export default function Navbar({
                     <Link href={profileLink} className="block rounded-xl px-3 py-2 text-neutral-300 hover:bg-white/5 hover:text-white">
                       Profile
                     </Link>
-                    {role === 'worker' && (
-                      <Link href="/worker/dashboard" className="relative block rounded-xl px-3 py-2 text-neutral-300 hover:bg-white/5 hover:text-white">
-                        Notifications
-                        {unreadCount > 0 && (
-                          <span className="ml-2 inline-flex items-center justify-center min-w-5 h-5 px-1 text-[10px] font-semibold bg-rose-500 text-white rounded-full">
-                            {unreadCount > 9 ? '9+' : unreadCount}
-                          </span>
-                        )}
-                      </Link>
-                    )}
-                    <button onClick={handleLogout} className="w-full text-left rounded-xl px-3 py-2 text-rose-200 hover:bg-rose-400/10">
+                    <Link href={dashboardLink} className="relative flex items-center justify-between rounded-xl px-3 py-2 text-neutral-300 hover:bg-white/5 hover:text-white">
+                      <span>Notifications</span>
+                      {unreadCount > 0 && (
+                        <span className="inline-flex items-center justify-center min-w-5 h-5 px-1 text-[10px] font-semibold bg-rose-500 text-white rounded-full">
+                          {unreadCount > 9 ? '9+' : unreadCount}
+                        </span>
+                      )}
+                    </Link>
+                    <button onClick={handleLogout} className="w-full text-left rounded-xl px-3 py-2 text-rose-200 hover:bg-rose-400/10 transition">
                       Logout
                     </button>
                   </div>
